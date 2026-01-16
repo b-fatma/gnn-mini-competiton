@@ -1,0 +1,22 @@
+{
+  "challenge": "MovieLens Rating Prediction",
+  "submissions": [
+    {
+      "user": "rf_baseline",
+      "filename": "rf_baseline_submission.csv",
+      "rmse": 1.062,
+      "mae": 0.8673,
+      "mape": 36.37,
+      "timestamp": "2026-01-16T18:38:07.688087"
+    },
+    {
+      "user": "rf_baseline",
+      "filename": "rf_baseline_submission.csv",
+      "rmse": 1.062,
+      "mae": 0.8673,
+      "mape": 36.37,
+      "timestamp": "2026-01-16T18:38:28.715759"
+    }
+  ],
+  "last_updated": "2026-01-16T18:38:28.715775"
+}
