@@ -18,23 +18,40 @@ import sys
 import os
 
 
+def get_repo_root():
+    """
+    Find the repository root by looking for data/ directory or .git folder
+    """
+    current = os.path.abspath(os.path.dirname(__file__))
+    while current != os.path.dirname(current):  # Stop at filesystem root
+        if os.path.exists(os.path.join(current, 'data')) or os.path.exists(os.path.join(current, '.git')):
+            return current
+        current = os.path.dirname(current)
+    # Fallback to current directory
+    return os.getcwd()
+
+
 def load_files(submission_file):
     """
     Load submission and ground truth files
     """
+    # Find repo root
+    repo_root = get_repo_root()
+    
+    # Convert submission file to absolute path if relative
+    if not os.path.isabs(submission_file):
+        submission_file = os.path.join(repo_root, submission_file)
+    
     # Load submission
     if not os.path.exists(submission_file):
         raise FileNotFoundError(f"Submission file not found: {submission_file}")
     
     submission = pd.read_csv(submission_file)
     
-    # Load ground truth (hidden test set)
-    # Try relative path first (for local testing), then absolute from repo root
-    truth_file = '../data/test_ratings_hidden.csv'
+    # Load ground truth (hidden test set) - always from repo root
+    truth_file = os.path.join(repo_root, 'data', 'test_ratings_hidden.csv')
     if not os.path.exists(truth_file):
-        truth_file = 'data/test_ratings_hidden.csv'
-    if not os.path.exists(truth_file):
-        raise FileNotFoundError(f"Ground truth file not found")
+        raise FileNotFoundError(f"Ground truth file not found: {truth_file}")
     
     truth = pd.read_csv(truth_file)
     
@@ -120,10 +137,11 @@ def main():
     if len(sys.argv) < 2:
         print("\n❌ Error: Please provide submission file path")
         print("Usage: python scoring_script.py <submission_file>")
-        print("Example: python scoring_script.py ../submissions/submission.csv")
+        print("Example: python scoring_script.py submissions/submission.csv")
         sys.exit(1)
     
     submission_file = sys.argv[1]
+    repo_root = get_repo_root()
     
     try:
         # Load files
@@ -156,8 +174,11 @@ def main():
         print(f"MAPE (Mean Absolute % Error):   {metrics['mape']:.2f}%")
         print("=" * 70)
         
-        # Print to file as well
-        log_file = submission_file.replace('.csv', '_score.txt')
+        # Print to file - ensure it's in the same directory as submission
+        submission_abs = os.path.join(repo_root, submission_file) if not os.path.isabs(submission_file) else submission_file
+        log_file = submission_abs.replace('.csv', '_score.txt')
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        
         with open(log_file, 'w') as f:
             f.write("MOVIE LENS RATING PREDICTION - SCORING RESULTS\n")
             f.write("=" * 70 + "\n")

@@ -9,6 +9,20 @@ import pandas as pd
 import os
 from datetime import datetime
 import json
+import subprocess
+
+
+def get_repo_root():
+    """
+    Find the repository root by looking for data/ directory or .git folder
+    """
+    current = os.path.abspath(os.path.dirname(__file__))
+    while current != os.path.dirname(current):  # Stop at filesystem root
+        if os.path.exists(os.path.join(current, 'data')) or os.path.exists(os.path.join(current, '.git')):
+            return current
+        current = os.path.dirname(current)
+    # Fallback to current directory
+    return os.getcwd()
 
 
 class LeaderboardManager:
@@ -17,7 +31,13 @@ class LeaderboardManager:
     """
     
     def __init__(self, leaderboard_file='leaderboard.json'):
-        self.leaderboard_file = leaderboard_file
+        repo_root = get_repo_root()
+        # Use absolute path to leaderboard file
+        if not os.path.isabs(leaderboard_file):
+            self.leaderboard_file = os.path.join(repo_root, leaderboard_file)
+        else:
+            self.leaderboard_file = leaderboard_file
+        self.repo_root = repo_root
         self.load_leaderboard()
     
     def load_leaderboard(self):
@@ -94,6 +114,11 @@ def generate_markdown_leaderboard(leaderboard_manager, output_file='LEADERBOARD.
     """
     Generate markdown leaderboard file
     """
+    # Use absolute path from repo root if not absolute
+    if not os.path.isabs(output_file):
+        repo_root = get_repo_root()
+        output_file = os.path.join(repo_root, output_file)
+    
     rankings = leaderboard_manager.get_rankings('rmse', limit=20)
     
     markdown = """# 🏆 MovieLens Rating Prediction - Leaderboard
@@ -141,22 +166,55 @@ def generate_markdown_leaderboard(leaderboard_manager, output_file='LEADERBOARD.
 def main():
     """
     Update leaderboard from submissions
+    Scores any CSV files that don't have score files yet
     """
     print("=" * 70)
     print("📋 UPDATING LEADERBOARD")
     print("=" * 70)
     
+    repo_root = get_repo_root()
     lb = LeaderboardManager()
     
-    # Scan submissions directory for score files
-    submissions_dir = 'submissions'
+    # Scan submissions directory
+    submissions_dir = os.path.join(repo_root, 'submissions')
     if not os.path.exists(submissions_dir):
-        print("No submissions directory found")
+        print(f"No submissions directory found: {submissions_dir}")
         return
     
+    # Find all CSV submission files
+    csv_files = [f for f in os.listdir(submissions_dir) if f.endswith('.csv')]
+    print(f"\nFound {len(csv_files)} CSV submission files")
+    
+    # Score any CSV files that don't have score files
+    for csv_file in csv_files:
+        csv_path = os.path.join(submissions_dir, csv_file)
+        score_file = csv_file.replace('.csv', '_score.txt')
+        score_path = os.path.join(submissions_dir, score_file)
+        
+        if not os.path.exists(score_path):
+            print(f"\n🎯 Scoring: {csv_file}")
+            # Run scoring script
+            try:
+                result = subprocess.run(
+                    ['python', 'starter_code/scoring_script.py', os.path.relpath(csv_path, repo_root)],
+                    cwd=repo_root,
+                    capture_output=True,
+                    text=True
+                )
+                if result.returncode == 0:
+                    print(f"   ✅ Scored successfully")
+                else:
+                    print(f"   ❌ Scoring failed")
+                    print(result.stderr)
+            except Exception as e:
+                print(f"   ❌ Error: {e}")
+        else:
+            print(f"✓ Already scored: {csv_file}")
+    
+    # Now load all score files
     score_files = [f for f in os.listdir(submissions_dir) if f.endswith('_score.txt')]
     
-    print(f"\nFound {len(score_files)} score files")
+    print(f"\n📊 Loading {len(score_files)} score files...")
     
     for score_file in score_files:
         filepath = os.path.join(submissions_dir, score_file)
@@ -181,8 +239,13 @@ def main():
             user = score_file.replace('_submission_score.txt', '').replace('_score.txt', '')
             submission_file = score_file.replace('_score.txt', '.csv')
             
-            lb.add_submission(user, submission_file, rmse, mae, mape)
-            print(f"✅ Added: {user} | RMSE: {rmse:.4f}")
+            # Check if already in leaderboard - only add if not already present with same metrics
+            existing = [s for s in lb.data['submissions'] if s['filename'] == submission_file]
+            if not existing or (existing and existing[0]['rmse'] != rmse):
+                lb.add_submission(user, submission_file, rmse, mae, mape)
+                print(f"✅ Added: {user} | RMSE: {rmse:.4f}")
+            else:
+                print(f"✓ Already in leaderboard: {user}")
     
     # Generate markdown leaderboard
     generate_markdown_leaderboard(lb)
