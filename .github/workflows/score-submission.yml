@@ -8,7 +8,7 @@ on:
 permissions:
   pull-requests: write
   issues: write
-  contents: read
+  contents: write
 
 jobs:
   score:
@@ -42,6 +42,18 @@ jobs:
               python starter_code/scoring_script.py "$file"
             fi
           done
+      
+      - name: Update leaderboard
+        run: |
+          python starter_code/update_leaderboard.py
+      
+      - name: Commit and push leaderboard updates
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add LEADERBOARD.md leaderboard.json
+          git commit -m "Update leaderboard with new scores" || true
+          git push || true
       
       - name: Post scores as comment
         if: always()
