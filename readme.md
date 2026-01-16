@@ -142,10 +142,6 @@ RMSE = √(mean((y_true - y_pred)²))
 - **MAE** (Mean Absolute Error)
 - **MAPE** (Mean Absolute Percentage Error)
 
-**Cold Start Performance:** We track RMSE separately on:
-- Warm-start pairs (both user & movie have 5+ ratings)
-- Cold-start pairs (at least one has ≤5 ratings)
-
 ---
 
 ## 🤝 How to Submit
@@ -191,7 +187,7 @@ git push origin submission/your_name
 ```
 
 **Create a Pull Request on GitHub:**
-1. Go to: https://github.com/YOUR-USERNAME/gnn
+1. Go to: https://github.com/b-fatma/gnn-mini-competition
 2. Click "New Pull Request"
 3. GitHub Actions will automatically score your submission
 4. Check PR comments for results
