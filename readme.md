@@ -49,7 +49,7 @@ git clone https://github.com/YOUR-USERNAME/movielens-gnn-challenge.git
 cd movielens-gnn-challenge
 
 # Install dependencies
-pip install -r starter_code/requirements.txt
+pip install -r requirements.txt
 
 # Run Random Forest baseline (~1.15 RMSE)
 cd starter_code
