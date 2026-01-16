@@ -16,7 +16,23 @@
       "mae": 0.8673,
       "mape": 36.37,
       "timestamp": "2026-01-16T18:38:28.715759"
+    },
+    {
+      "user": "submission",
+      "filename": "submission.csv",
+      "rmse": 1.043,
+      "mae": 0.8289,
+      "mape": 34.25,
+      "timestamp": "2026-01-16T21:16:03.326491"
+    },
+    {
+      "user": "test_model",
+      "filename": "test_model_submission.csv",
+      "rmse": 1.6967,
+      "mae": 1.3872,
+      "mape": 48.76,
+      "timestamp": "2026-01-16T21:16:03.326887"
     }
   ],
-  "last_updated": "2026-01-16T18:38:28.715775"
+  "last_updated": "2026-01-16T21:16:03.326903"
 }
