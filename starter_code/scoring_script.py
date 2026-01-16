@@ -29,9 +29,12 @@ def load_files(submission_file):
     submission = pd.read_csv(submission_file)
     
     # Load ground truth (hidden test set)
+    # Try relative path first (for local testing), then absolute from repo root
     truth_file = '../data/test_ratings_hidden.csv'
     if not os.path.exists(truth_file):
-        raise FileNotFoundError(f"Ground truth file not found: {truth_file}")
+        truth_file = 'data/test_ratings_hidden.csv'
+    if not os.path.exists(truth_file):
+        raise FileNotFoundError(f"Ground truth file not found")
     
     truth = pd.read_csv(truth_file)
     
