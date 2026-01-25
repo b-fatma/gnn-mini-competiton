@@ -136,7 +136,6 @@ git push origin submission/your-name
 │   └── test_ratings_hidden.csv    # Ground truth (hidden)
 ├── starter_code/
 │   ├── dataloader.py              # Data loading
-│   ├── models.py                  # GNN models
 │   ├── rf_baseline.py             # Baseline
 │   └── scoring_script.py          # Evaluation
 └── submissions/                   # Your submissions

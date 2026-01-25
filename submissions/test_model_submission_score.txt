@@ -1,0 +1,8 @@
+MOVIE LENS RATING PREDICTION - SCORING RESULTS
+======================================================================
+Submission: submissions/test_model_submission.csv
+Predictions evaluated: 20774
+
+RMSE: 1.6967
+MAE:  1.3872
+MAPE: 48.76%
