@@ -1,0 +1,6 @@
+[submodule "DGL"]
+	path = DGL
+	url = https://github.com/basiralab/DGL
+[submodule "bright"]
+	path = bright
+	url = https://github.com/b-fatma/bright
